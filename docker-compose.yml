@@ -23,6 +23,8 @@ services:
       - ARCHON_AGENTS_PORT=${ARCHON_AGENTS_PORT:-8052}
       - AGENTS_ENABLED=${AGENTS_ENABLED:-true}
       - ARCHON_HOST=${HOST:-0.0.0.0}
+      # 🆕 WICHTIG: Internal Secret für Service-to-Service Kommunikation
+      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET:-archon-internal-secret-key-change-in-production}
     networks:
       - app-network
     healthcheck:
@@ -67,6 +69,8 @@ services:
       - ARCHON_MCP_PORT=${ARCHON_MCP_PORT:-8051}
       - ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
       - ARCHON_AGENTS_PORT=${ARCHON_AGENTS_PORT:-8052}
+      # 🆕 MCP braucht auch das Secret
+      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET:-archon-internal-secret-key-change-in-production}
     networks:
       - app-network
     depends_on:
@@ -92,6 +96,8 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - ARCHON_AGENTS_PORT=${ARCHON_AGENTS_PORT:-8052}
       - ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
+      # 🆕 KRITISCH: Agents braucht das Secret um sich beim Server zu authentifizieren
+      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET:-archon-internal-secret-key-change-in-production}
     networks:
       - app-network
     restart: unless-stopped
