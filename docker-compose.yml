@@ -26,7 +26,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${ARCHON_SERVER_PORT:-8181}/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8181/api/health"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -70,8 +70,7 @@ services:
     networks:
       - app-network
     depends_on:
-      archon-server:
-        condition: service_healthy
+      - archon-server
     restart: unless-stopped
 
   archon-agents:
@@ -95,30 +94,22 @@ services:
       - ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${ARCHON_AGENTS_PORT:-8052}/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
     restart: unless-stopped
 
   archon-frontend:
     build: 
       context: ./archon-ui-main
-      args:
-        VITE_ARCHON_SERVER_URL: http://archon-server:${ARCHON_SERVER_PORT:-8181}
     container_name: archon-ui
     ports:
       - "${ARCHON_UI_PORT:-3737}:3737"
     environment:
-      # 🆕 WICHTIG: Vollständige Server-URL für den Browser
-      - VITE_ARCHON_SERVER_URL=http://archon-server:${ARCHON_SERVER_PORT:-8181}
+      # WICHTIG: Vollständige Server-URL für interne Docker-Kommunikation
+      - VITE_ARCHON_SERVER_URL=http://archon-server:8181
       # Legacy - für Vite Proxy fallback
-      - VITE_ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
+      - VITE_ARCHON_SERVER_PORT=8181
       - VITE_ARCHON_SERVER_HOST=archon-server
       # Build-Zeit Variablen
-      - ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
+      - ARCHON_SERVER_PORT=8181
       - HOST=${HOST:-0.0.0.0}
       - PROD=${PROD:-true}
       - VITE_ALLOWED_HOSTS=${VITE_ALLOWED_HOSTS:-}
@@ -127,14 +118,7 @@ services:
     networks:
       - app-network
     depends_on:
-      archon-server:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3737/"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      - archon-server
     restart: unless-stopped
 
 networks:
